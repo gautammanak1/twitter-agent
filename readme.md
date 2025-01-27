@@ -101,8 +101,6 @@ This will start a server on port `5001`, waiting for the Search Agent to send co
 Pull requests are welcome. For major changes, please open an issue first to discuss your ideas.
 Ensure to update tests as appropriate.
 
-## License
-[Choose an appropriate license or leave this section out if undecided]
 
 ## Contact
 For issues or inquiries, reach out via [https://gautammanaktech.vercel.app/].
