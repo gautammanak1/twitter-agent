@@ -23,8 +23,8 @@ This project comprises two Flask-based agents:
 ### Setup Environment
 1. **Clone the repository**:
    ```bash
-   git clone [repository-url]
-   cd [project-directory]
+   git clone https://github.com/gautammanak1/twitter-agent
+   cd twitter-agent
    ```
 
 2. **Create a virtual environment (optional but recommended)**:
