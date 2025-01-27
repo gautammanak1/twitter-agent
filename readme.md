@@ -90,10 +90,10 @@ This will start a server on port `5001`, waiting for the Search Agent to send co
 - **Image Generation**: Integrate services like DALL-E or Google's Imagen to add visuals to tweets.
 - **Enhanced Tweet Curation**: Implement a system to categorize, filter, or moderate content before posting.
 - **User Interaction**: Allow user input or feedback to customize tweet topics.
-- **Multi-Platform Support**: Extend to LinkedIn, Instagram, or Mastodon.
+- **Multi-Platform Support**: Extend to LinkedIn, Instagram.
 - **Scheduled Posts**: Implement a scheduling system for optimal engagement.
 - **Sentiment Analysis**: Analyze sentiment to adjust tweet strategy.
-- **Agent Interaction**: Add more agents for monitoring trends, managing interactions, or generating content based on events.
+- **Agent Interaction**: Add more agents to monitor trends, manage interactions, or generate content based on events.
 
 
 
