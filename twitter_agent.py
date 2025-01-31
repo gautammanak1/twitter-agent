@@ -10,10 +10,10 @@ import requests
 import tweepy
 
 # Twitter API credentials
-CONSUMER_KEY = ""
-CONSUMER_SECRET = ""
-ACCESS_TOKEN = ""
-ACCESS_TOKEN_SECRET = ""
+CONSUMER_KEY = "7jb9bVEhPPGdJ5uiHXQ1BSqRW"
+CONSUMER_SECRET = "r8VsJ9vNZAP5w6SyPAwMB0gPiMlmbxsKoE9x1W2en4gSh2x9BW"
+ACCESS_TOKEN = "1724444645399158784-NMEuCX2c8eSznB4UTxJMwxujxZp9Vj"
+ACCESS_TOKEN_SECRET = "9O9lX6tinqrxuw5Qj5NAStwB3rMSlWcR7WGMgp1ePUPhJ"
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -70,8 +70,7 @@ def register():
 def webhook():
     data = request.json
     try:
-        ai_identity = Identity.from_seed("twitter-agent-seed", 0)  
-        payload = data.get('payload', {})
+        payload = json.loads(data.get('payload', "{}"))  # Parse payload as JSON
         tweet_content = payload.get('tweet_content', None)
         
         if tweet_content:
@@ -82,9 +81,11 @@ def webhook():
                 tweet_id = response.data['id']
                 logger.info(f"Tweet posted successfully! Tweet ID: {tweet_id}")
             else:
-                logger.error(" Failed to post tweet: No response data.")
+                logger.error("Failed to post tweet: No response data.")
         else:
             logger.error("No tweet content in received data.")
+    except json.JSONDecodeError as e:
+        logger.error(f"Error decoding payload JSON: {e}")
     except Exception as e:
         logger.error(f"Error posting tweet: {e}")
     
