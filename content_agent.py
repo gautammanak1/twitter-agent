@@ -1,112 +1,113 @@
-import json
-import os
-import sys
-import logging
-import requests
-from flask import Flask, request
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 from fetchai.crypto import Identity
 from fetchai.registration import register_with_agentverse
-from uuid import uuid4
+from fetchai.communication import parse_message_from_agent, send_message_to_agent
+import logging
+import os
+from dotenv import load_dotenv
+import requests
 
 GEMINI_API_KEY = "AIzaSyDxxSzqkL24eW3nSCjNyyM9CaydBtBqfTA"
 GEMINI_TEXT_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
-
 app = Flask(__name__)
+CORS(app)
 
-AGENTVERSE_KEY = os.environ.get('AGENTVERSE_KEY', "")
-if AGENTVERSE_KEY == "":
-    sys.exit("Environment variable AGENTVERSE_KEY not defined")
+client_identity = None 
 
-@app.route('/register', methods=['GET'])
-def register():
-    ai_identity = Identity.from_seed("content-generation-agent-seed", 0)
-    name = "content-generation-agent"
-    
-    readme = """
-    <description>My AI's description for generating content</description>
-    <use_cases>
-        <use_case>Generate content based on queries</use_case>
-    </use_cases>
-    """
-    ai_webhook = os.environ.get('CONTENT_GENERATION_AGENT_WEBHOOK', "http://127.0.0.1:5003/webhook")
-    
+def init_client():
+    """Initialize and register the client agent."""
+    global client_identity
     try:
+        client_identity = Identity.from_seed(os.getenv("AGENT_SECRET_KEY_CONTENT"), 0)
+        logger.info(f"Content Generation Agent started with address: {client_identity.address}")
+
+        readme = """
+            <description>My AI's description for generating content</description>
+            <use_cases>
+                <use_case>Generates content based on queries</use_case>
+            </use_cases>
+        """
         register_with_agentverse(
-            ai_identity,
-            ai_webhook,
-            AGENTVERSE_KEY,
-            name,
-            readme,
+            identity=client_identity,
+            url="http://localhost:5003/api/webhook",
+            agentverse_token=os.getenv("AGENTVERSE_API_KEY"),
+            agent_title="Content Generation Agent",
+            readme=readme
         )
-        logger.info("Agent registration successful")
-    except requests.exceptions.HTTPError as err:
-        logger.error(f"Registration failed: {err}")
-    except Exception as e:
-        logger.error(f"Unexpected error during registration: {e}")
-    
-    return {"status": "Agent registration attempted"}
 
-@app.route('/webhook', methods=['POST'])
+        logger.info("Content Generation Agent registration complete!")
+
+    except Exception as e:
+        logger.error(f"Initialization error: {e}")
+        raise
+@app.route('/api/webhook', methods=['POST'])
 def webhook():
-    data = request.json
+    """Handle incoming messages"""
     try:
-        payload = json.loads(data.get('payload', "{}"))  # Parse payload as JSON
-        query = payload.get("query", "")
+        # Parse the incoming webhook message
+        data = request.get_data().decode("utf-8")
+        logger.info("Received response")
+
+        message = parse_message_from_agent(data)
+        payload = message.payload
+        query = payload.get("query", None)
+
         if query:
-            logger.info(f"Received query: {query}")
             generated_content = generate_content(query)
             if generated_content:
                 send_to_search_agent(generated_content)
-    except json.JSONDecodeError as e:
-        logger.error(f"Error decoding payload JSON: {e}")
+                return jsonify({"status": "success", "content": generated_content})
+            else:
+                return jsonify({"status": "error", "message": "Failed to generate content"}), 500
+        else:
+            return jsonify({"status": "error", "message": "No query provided"}), 400
+
     except Exception as e:
         logger.error(f"Error in webhook: {e}")
-    
-    return {"status": "Message processed"}
+        return jsonify({"error": str(e)}), 500
 
 def generate_content(query):
     text_payload = {
         "contents": [{"parts": [{"text": query}]}]
     }
     headers = {"Content-Type": "application/json"}
-    text_response = requests.post(GEMINI_TEXT_URL, json=text_payload, headers=headers)
-    text_response_json = text_response.json()
+    try:
+        response = requests.post(GEMINI_TEXT_URL, json=text_payload, headers=headers)
+        response_json = response.json()
 
-    if "candidates" in text_response_json:
-        content = text_response_json["candidates"][0]["content"]["parts"][0]["text"]
-        logger.info(f"Generated content: {content}")
-        return content
-    else:
-        logger.error("Failed to generate content from Gemini API")
+        if "candidates" in response_json and response_json["candidates"]:
+            return response_json["candidates"][0]["content"]["parts"][0]["text"]
+        else:
+            return None
+    except Exception as e:
+        logger.error(f"Failed to generate content: {e}")
         return None
 
 def send_to_search_agent(content):
-    webhook_url = os.environ.get('SEARCH_AGENT_WEBHOOK', "http://127.0.0.1:5002/webhook")
-    logger.info(f"Attempting to send to Search Agent at {webhook_url}")
-    sender_identity = Identity.from_seed("content-generation-agent-seed", 0)
-    target_identity = Identity.from_seed("search-agent-seed", 0)  
-    
-    envelope = {
-        "version": "1.0",
-        "sender": sender_identity.address,
-        "target": target_identity.address,
-        "session": str(uuid4()),
-        "schema_digest": "",  
-        "payload": json.dumps({  # Convert payload to JSON string
-            "type": "content_generated",
-            "content": content
-        })
-    }
-    headers = {"Content-Type": "application/json"}
-    response = requests.post(webhook_url, json=envelope, headers=headers)
-    
-    if response.status_code == 200:
-        logger.info(f"Content sent successfully to Search Agent")
-    else:
-        logger.error(f"Failed to send content to Search Agent. Status code: {response.status_code}")
+    try:
+        search_agent_address = os.getenv("SEARCH_AGENT_ADDRESS")
+        payload = {"type": "content_generated", "content": content}
+        send_message_to_agent(
+            client_identity,
+            search_agent_address,
+            payload
+        )
+        logger.info(f"Content sent to Search Agent: {content[:50]}...")  
+    except Exception as e:
+        logger.error(f"Error sending to Search Agent: {e}")
+def start_server():
+    """Start the Flask server."""
+    try:
+        load_dotenv()
+        init_client()
+        app.run(host="0.0.0.0", port=5003)
+    except Exception as e:
+        logger.error(f"Server error: {e}")
+        raise
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5003, debug=True)
+    start_server()

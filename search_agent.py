@@ -1,145 +1,122 @@
-import json
-import os
-import sys
-import logging
-import requests
-import time
-from flask import Flask, request
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 from fetchai.crypto import Identity
 from fetchai.registration import register_with_agentverse
-from uuid import uuid4
+from fetchai.communication import parse_message_from_agent, send_message_to_agent
+import logging
+import os
+from dotenv import load_dotenv
+import time
 import threading
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
-
 app = Flask(__name__)
+CORS(app)
 
-AGENTVERSE_KEY = os.environ.get('AGENTVERSE_KEY', "")
-if AGENTVERSE_KEY == "":
-    sys.exit("Environment variable AGENTVERSE_KEY not defined")
-
-@app.route('/register', methods=['GET'])
-def register():
-    ai_identity = Identity.from_seed("search-agent-seed", 0)
-    name = "search-agent"
-    
-    readme = """
-    <description>My AI's description for generating AI trend tweets</description>
-    <use_cases>
-        <use_case>Generate and send AI trend tweets to Twitter Agent</use_case>
-    </use_cases>
-    """
-    ai_webhook = os.environ.get('SEARCH_AGENT_WEBHOOK', "http://127.0.0.1:5002/webhook")
-    
+client_identity = None 
+def init_client():
+    """Initialize and register the client agent."""
+    global client_identity
     try:
+        agent_secret_key = os.getenv("AGENT_SECRET_KEY_SEARCH")
+        if not agent_secret_key:
+            raise ValueError("AGENT_SECRET_KEY_SEARCH environment variable not set.")
+        client_identity = Identity.from_seed(agent_secret_key, 0)
+        logger.info(f"Search Agent started with address: {client_identity.address}")
+
+        readme = """
+            <description>My AI's description for searching agents</description>
+            <use_cases>
+                <use_case>Search for content generation agents</use_case>
+            </use_cases>
+        """
+
+        agentverse_token = os.getenv("AGENTVERSE_API_KEY")
+        if not agentverse_token:
+            raise ValueError("AGENTVERSE_API_KEY environment variable not set.")
+        
         register_with_agentverse(
-            ai_identity,
-            ai_webhook,
-            AGENTVERSE_KEY,
-            name,
-            readme,
+            identity=client_identity,
+            url="http://localhost:5002/api/webhook",
+            agentverse_token=agentverse_token,
+            agent_title="Search Agent",
+            readme=readme
         )
-        logger.info("Agent registration successful")
-    except requests.exceptions.HTTPError as err:
-        logger.error(f"Registration failed: {err}")
-    except Exception as e:
-        logger.error(f"Unexpected error during registration: {e}")
-    
-    return {"status": "Agent registration attempted"}
 
-@app.route('/webhook', methods=['POST'])
-def webhook():
-    data = request.json
-    try:
-        payload = json.loads(data.get('payload', "{}"))  # Parse payload as JSON
-        if payload.get("type") == "content_generated":
-            tweet_content = payload.get("content")
-            if tweet_content:
-                logger.info(f"Received generated content: {tweet_content}")
-                send_to_twitter_agent(tweet_content)
-    except json.JSONDecodeError as e:
-        logger.error(f"Error decoding payload JSON: {e}")
-        return {"status": f"error: {e}"}
+        logger.info("Search Agent registration complete!")
+
     except Exception as e:
-        logger.error(f"Error processing message: {e}")
-        return {"status": f"error: {e}"}
-    
-    return {"status": "Message processed"}
+        logger.error(f"Initialization error: {e}")
+        raise
+@app.route('/api/webhook', methods=['POST'])
+def webhook():
+    """Handle incoming messages"""
+    try:
+        data = request.get_data().decode("utf-8")
+        logger.info("Received response")
+
+        message = parse_message_from_agent(data)
+        payload = message.payload
+
+        logger.info(f"Processed response: {payload}")
+        if payload.get("type") == "content_generated":
+            send_to_twitter_agent(payload.get("content"))
+        return jsonify({"status": "success"})
+
+    except Exception as e:
+        logger.error(f"Error in webhook: {e}")
+        return jsonify({"error": str(e)}), 500
 
 def send_to_twitter_agent(content):
-    webhook_url = os.environ.get('TWITTER_AGENT_WEBHOOK', "http://127.0.0.1:5001/webhook")
-    logger.info(f"Attempting to send to Twitter Agent at {webhook_url}")
-    sender_identity = Identity.from_seed("search-agent-seed", 0)
-    target_identity = Identity.from_seed("twitter-agent-seed", 0)  
-    
-    envelope = {
-        "version": "1.0",
-        "sender": sender_identity.address,
-        "target": target_identity.address,
-        "session": str(uuid4()),
-        "schema_digest": "",  
-        "payload": json.dumps({  
-            "tweet_content": content[:280]
-        })
-    }
-    headers = {"Content-Type": "application/json"}
-    response = requests.post(webhook_url, json=envelope, headers=headers)
-    
-    if response.status_code == 200:
-        logger.info(f"Content sent successfully to Twitter Agent")
-    else:
-        logger.error(f"Failed to send content to Twitter Agent. Status code: {response.status_code}")
-
-def send_to_content_generation_agent(query):
-    webhook_url = os.environ.get('CONTENT_GENERATION_AGENT_WEBHOOK', "http://127.0.0.1:5003/webhook")
-    logger.info(f"Attempting to send to Content Generation Agent at {webhook_url}")
-    sender_identity = Identity.from_seed("search-agent-seed", 0)
-    target_identity = Identity.from_seed("content-generation-agent-seed", 0)  
-    
-    envelope = {
-        "version": "1.0",
-        "sender": sender_identity.address,
-        "target": target_identity.address,
-        "session": str(uuid4()),
-        "schema_digest": "",  
-        "payload": json.dumps({  # Convert payload to JSON string
-            "query": query
-        })
-    }
-    headers = {"Content-Type": "application/json"}
-    response = requests.post(webhook_url, json=envelope, headers=headers)
-    
-    if response.status_code == 200:
-        logger.info(f"Query sent successfully to Content Generation Agent")
-    else:
-        logger.error(f"Failed to send query to Content Generation Agent. Status code: {response.status_code}")
-
-def wait_for_server(port):
-    while True:
-        try:
-            response = requests.get(f'http://127.0.0.1:{port}')
-            if response.status_code == 200:
-                return  
-        except requests.ConnectionError:
-            logger.info(f"Waiting for server on port {port} to start...")
-            time.sleep(1)  
+    try:
+        twitter_agent_address = os.getenv("TWITTER_AGENT_ADDRESS")
+        if not twitter_agent_address:
+            raise ValueError("TWITTER_AGENT_ADDRESS environment variable not set.")
+        payload = {"tweet_content": content[:280]}
+        send_message_to_agent(
+            client_identity,
+            twitter_agent_address,
+            payload
+        )
+        logger.info(f"Content sent to Twitter Agent: {content[:280]}")
+    except Exception as e:
+        logger.error(f"Error sending to Twitter Agent: {e}")
 
 def generate_and_send_content():
-    wait_for_server(5001)  
-    
     while True:
         try:
             query = "Generate a tweet about the latest AI trends."
-            send_to_content_generation_agent(query)
+            content_agent_address = os.getenv("CONTENT_AGENT_ADDRESS")
+            if not content_agent_address:
+                logger.warning("CONTENT_AGENT_ADDRESS not set. Attempting to continue without content generation.")
+                time.sleep(60) 
+                continue
+            payload = {"query": query}
+            send_message_to_agent(
+                client_identity,
+                content_agent_address,
+                payload
+            )
+            logger.info(f"Query sent to Content Generation Agent: {query}")
         except Exception as e:
             logger.error(f"Error in generate_and_send_content: {e}")
         
         time.sleep(60)  
+def start_server():
+    """Start the Flask server."""
+    try:
+        load_dotenv()
+        init_client()
+        
+        content_thread = threading.Thread(target=generate_and_send_content)
+        content_thread.daemon = True 
+        content_thread.start()
+
+        app.run(host="0.0.0.0", port=5002)
+    except Exception as e:
+        logger.error(f"Server error: {e}")
+        raise
 
 if __name__ == "__main__":
-    content_thread = threading.Thread(target=generate_and_send_content)
-    content_thread.daemon = True 
-    content_thread.start()
-
-    app.run(host='0.0.0.0', port=5002, debug=True)
+    start_server()
