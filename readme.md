@@ -54,16 +54,30 @@ Follow these steps to set up and run the agents:
 
 1.  Clone the repository:
     
-
-Plain textANTLR4BashCC#CSSCoffeeScriptCMakeDartDjangoDockerEJSErlangGitGoGraphQLGroovyHTMLJavaJavaScriptJSONJSXKotlinLaTeXLessLuaMakefileMarkdownMATLABMarkupObjective-CPerlPHPPowerShell.propertiesProtocol BuffersPythonRRubySass (Sass)Sass (Scss)SchemeSQLShellSwiftSVGTSXTypeScriptWebAssemblyYAMLXML`   git clone https://github.com/gautammanak1/twitter-agent.git cd twitter-agent   `
+`   git clone https://github.com/gautammanak1/twitter-agent.git cd twitter-agent   `
 
 2.Install dependencies:
 
-Plain textANTLR4BashCC#CSSCoffeeScriptCMakeDartDjangoDockerEJSErlangGitGoGraphQLGroovyHTMLJavaJavaScriptJSONJSXKotlinLaTeXLessLuaMakefileMarkdownMATLABMarkupObjective-CPerlPHPPowerShell.propertiesProtocol BuffersPythonRRubySass (Sass)Sass (Scss)SchemeSQLShellSwiftSVGTSXTypeScriptWebAssemblyYAMLXML`   pip install -r requirements.txt   `
+`   pip install -r requirements.txt   `
 
 3 Run the agents:
 
-Plain textANTLR4BashCC#CSSCoffeeScriptCMakeDartDjangoDockerEJSErlangGitGoGraphQLGroovyHTMLJavaJavaScriptJSONJSXKotlinLaTeXLessLuaMakefileMarkdownMATLABMarkupObjective-CPerlPHPPowerShell.propertiesProtocol BuffersPythonRRubySass (Sass)Sass (Scss)SchemeSQLShellSwiftSVGTSXTypeScriptWebAssemblyYAMLXML`   python3 search_agent.pypython3 content_agent.pypython3 twitter_agent.py   `
+`python3 search_agent.py
+python3 content_agent.py
+python3 twitter_agent.py   `
+
+4 .env
+
+`AGENTVERSE_API_KEY=
+AGENT_SECRET_KEY_SEARCH= 
+AGENT_SECRET_KEY_CONTENT=
+AGENT_SECRET_KEY_TWITTER=
+CONTENT_AGENT_ADDRESS= 
+SEARCH_AGENT_ADDRESS=
+TWITTER_AGENT_ADDRESS=
+GEMINI_API_KEY = 
+GEMINI_TEXT_URL =   `
+
 
 Once running, the system will continuously generate and post AI-related tweets automatically!
 
