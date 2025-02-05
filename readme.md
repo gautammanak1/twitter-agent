@@ -1,106 +1,81 @@
-# AI Tweet Generator and Poster
+### Automating AI Trend Tweets with Fetch.ai, Gemini API & Twitter API
 
-## Fetch.ai SDK
-The **Fetch.ai SDK** provides an easy way to access the core components of the uAgents library, allowing you to create agents outside the asynchronous uAgents framework. This is ideal for building synchronous programs while maintaining agentic functionalities.
-- Documentation: [https://fetch.ai/docs/guides/fetchai-sdk/quickstart](https://fetch.ai/docs/guides/fetchai-sdk/quickstart)
-- GitHub Repository: [https://github.com/fetchai/fetchai](https://github.com/fetchai/fetchai)
+### Introduction
 
+Imagine an AI system that automatically tweets about the latest AI trends without human intervention! This project does exactly that using **Fetch.ai SDK, Google’s Gemini API, and Twitter API**. It consists of three smart agents working together in an automated and efficient manner.
 
-## Overview
-This project comprises two Flask-based agents using the Fetch.ai SDK:
-- **Search Agent**: Generates content about AI trends using Google's Gemini API.
-- **Twitter Agent**: Posts the generated content to Twitter using the Twitter API.
+### How It Works
 
-## Project Structure
-- `search_agent.py`: Contains the logic for generating and sending tweet content.
-- `twitter_agent.py`: Handles receiving and posting tweets on Twitter.
+The system is powered by three agents:
 
-## Prerequisites
-- Python 3.8+
-- Flask
-- Fetch.ai SDK for agent communication
-- Tweepy for Twitter API interactions
-- `requests` for HTTP requests
-- An API key for Google's Gemini service
-- Twitter Developer account for API credentials
+1.  **Search Agent** — Finds the Content Agent to generate AI-related content.
+    
+2.  **Content Agent** — Uses Google’s Gemini API to create engaging AI trend content.
+    
+3.  **Twitter Agent** — Receives the content and posts it on Twitter.
+    
 
-## Installation
+### Step-by-Step Process:
 
-### Setup Environment
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/gautammanak1/twitter-agent
-   cd twitter-agent
-   ```
+*   The **Search Agent** starts by locating the **Content Agent**, sends a request, and receives the generated content.
+    
+*   Then, the **Search Agent** finds the **Twitter Agent** and forwards the content.
+    
+*   The **Twitter Agent** posts the content on Twitter and returns the tweet ID.
+    
 
-2. **Create a virtual environment (optional but recommended):**
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows use `venv\Scripts\activate`
-   ```
+All agents communicate using **multi-threading**, making the system efficient and fast.
 
-3. **Install dependencies:**
-   ```bash
-   pip install Flask fetchai tweepy requests
-   ```
+### **Technologies Used**
 
-## Configuration
+*   **Fetch.ai SDK** — Enables agent-based automation.
+    
+*   **Google Gemini API** — Generates AI-related content.
+    
+*   **Twitter API** — Posts tweets automatically.
+    
+*   **uAgents Framework** — Simplifies AI agent interactions.
+    
 
-### Environment Variables:
-- `AGENTVERSE_KEY`: Your key for agentverse registration.
-- `TWITTER_AGENT_WEBHOOK`: URL of the Twitter Agent for the Search Agent to send content to.
-- `SEARCH_AGENT_WEBHOOK`: URL of the Search Agent for any potential interactions (not used in the current setup).
+### Project Links
 
-Set these in your environment or in a `.env` file:
-```bash
-export AGENTVERSE_KEY="your-agentverse-key"
-export TWITTER_AGENT_WEBHOOK="http://127.0.0.1:5001/webhook"
-export SEARCH_AGENT_WEBHOOK="http://127.0.0.1:5002/webhook"
-```
+*   **GitHub Repository**: [Twitter Agent Project](https://github.com/gautammanak1/twitter-agent)
+    
+*   **Twitter API Docs**: [Twitter API](https://developer.x.com/en/docs/x-api)
+    
+*   **Google Gemini API**: [Gemini API](https://aistudio.google.com/welcome)
+    
+*   **Fetch.ai SDK Docs**: [Fetch.ai SDK Quickstart](https://fetch.ai/docs/guides/fetchai-sdk/quickstart)
+    
 
-- **Twitter API Credentials**: Replace the placeholder values in `twitter_agent.py` with your actual Twitter API credentials.
-- **Gemini API Key**: Replace the placeholder `GEMINI_API_KEY` in `search_agent.py` with your actual API key.
+### How to Run the Project
 
-## Running the Agents
+Follow these steps to set up and run the agents:
 
-### Search Agent
-Start the search agent:
-```bash
-python search_agent.py
-```
-This will start a server on port `5002` and begin generating tweets about AI trends every 60 seconds, sending them to the Twitter Agent.
+1.  Clone the repository:
+    
 
-### Twitter Agent
-Start the twitter agent:
-```bash
-python twitter_agent.py
-```
-This will start a server on port `5001`, waiting for the Search Agent to send content which it will then post to Twitter.
+Plain textANTLR4BashCC#CSSCoffeeScriptCMakeDartDjangoDockerEJSErlangGitGoGraphQLGroovyHTMLJavaJavaScriptJSONJSXKotlinLaTeXLessLuaMakefileMarkdownMATLABMarkupObjective-CPerlPHPPowerShell.propertiesProtocol BuffersPythonRRubySass (Sass)Sass (Scss)SchemeSQLShellSwiftSVGTSXTypeScriptWebAssemblyYAMLXML`   git clone https://github.com/gautammanak1/twitter-agent.git cd twitter-agent   `
 
-## How It Works
-### Search Agent:
-- Uses Gemini API to generate text about AI trends.
-- Sends this content to the Twitter Agent via HTTP POST every minute.
+2.Install dependencies:
 
-### Twitter Agent:
-- Listens for incoming content from the Search Agent.
-- Once received, it uses the Tweepy library to post this content as a tweet on Twitter.
+Plain textANTLR4BashCC#CSSCoffeeScriptCMakeDartDjangoDockerEJSErlangGitGoGraphQLGroovyHTMLJavaJavaScriptJSONJSXKotlinLaTeXLessLuaMakefileMarkdownMATLABMarkupObjective-CPerlPHPPowerShell.propertiesProtocol BuffersPythonRRubySass (Sass)Sass (Scss)SchemeSQLShellSwiftSVGTSXTypeScriptWebAssemblyYAMLXML`   pip install -r requirements.txt   `
 
-## Future Scope
-- **Image Generation**: Integrate services like DALL-E or Google's Imagen to add visuals to tweets.
-- **Enhanced Tweet Curation**: Implement a system to categorize, filter, or moderate content before posting.
-- **User Interaction**: Allow user input or feedback to customize tweet topics.
-- **Multi-Platform Support**: Extend to LinkedIn, Instagram.
-- **Scheduled Posts**: Implement a scheduling system for optimal engagement.
-- **Sentiment Analysis**: Analyze sentiment to adjust tweet strategy.
-- **Agent Interaction**: Add more agents to monitor trends, manage interactions, or generate content based on events.
+3 Run the agents:
 
+Plain textANTLR4BashCC#CSSCoffeeScriptCMakeDartDjangoDockerEJSErlangGitGoGraphQLGroovyHTMLJavaJavaScriptJSONJSXKotlinLaTeXLessLuaMakefileMarkdownMATLABMarkupObjective-CPerlPHPPowerShell.propertiesProtocol BuffersPythonRRubySass (Sass)Sass (Scss)SchemeSQLShellSwiftSVGTSXTypeScriptWebAssemblyYAMLXML`   python3 search_agent.pypython3 content_agent.pypython3 twitter_agent.py   `
 
+Once running, the system will continuously generate and post AI-related tweets automatically!
 
-## Contributions
-Pull requests are welcome. For major changes, please open an issue first to discuss your ideas.
-Ensure to update tests as appropriate.
+### Future Enhancements
 
+*   **Sentiment Analysis**: Generate content based on trending emotions.
+    
+*   **Tweet Scheduling**: Post tweets at optimized times.
+    
+*   **Better Error Handling**: Improve debugging and monitoring.
+    
 
-## Contact
-For issues or inquiries, reach out via [https://gautammanaktech.vercel.app/].
+### Conclusion
+
+This project showcases the power of AI-driven automation using **Fetch.ai SDK**. By integrating AI agents, multi-threading, and real-time content generation, it creates a seamless system for AI trend updates on Twitter. Try it out and let your AI agent tweet for you!

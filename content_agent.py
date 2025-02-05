@@ -8,7 +8,7 @@ import os
 from dotenv import load_dotenv
 import requests
 
-GEMINI_API_KEY = "AIzaSyDxxSzqkL24eW3nSCjNyyM9CaydBtBqfTA"
+GEMINI_API_KEY = ""
 GEMINI_TEXT_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
