@@ -9,10 +9,10 @@ from dotenv import load_dotenv
 import tweepy
 
 
-CONSUMER_KEY = "7jb9bVEhPPGdJ5uiHXQ1BSqRW"
-CONSUMER_SECRET = "r8VsJ9vNZAP5w6SyPAwMB0gPiMlmbxsKoE9x1W2en4gSh2x9BW"
-ACCESS_TOKEN = "1724444645399158784-NMEuCX2c8eSznB4UTxJMwxujxZp9Vj"
-ACCESS_TOKEN_SECRET = "9O9lX6tinqrxuw5Qj5NAStwB3rMSlWcR7WGMgp1ePUPhJ"
+CONSUMER_KEY = ""
+CONSUMER_SECRET = ""
+ACCESS_TOKEN = ""
+ACCESS_TOKEN_SECRET = ""
 
 auth = tweepy.OAuth1UserHandler(CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
 api = tweepy.API(auth)
@@ -37,10 +37,14 @@ def init_client():
         logger.info(f"Twitter Agent started with address: {client_identity.address}")
 
         readme = """
-            <description>My AI's description for posting to Twitter</description>
-            <use_cases>
-                <use_case>Automatically posts content to Twitter</use_case>
-            </use_cases>
+           ![domain:innovation-lab](https://img.shields.io/badge/innovation--lab-3D8BD3)
+
+# Receives the content from search agent and posts it on Twitter.
+
+
+## Description
+Uses Google’s Gemini API to create engaging AI trend content.
+
         """
 
         # Register the agent with Agentverse
