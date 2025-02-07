@@ -26,10 +26,12 @@ def init_client():
         logger.info(f"Search Agent started with address: {client_identity.address}")
 
         readme = """
-            <description>My AI's description for searching agents</description>
-            <use_cases>
-                <use_case>Search for content generation agents</use_case>
-            </use_cases>
+           ![domain:innovation-lab](https://img.shields.io/badge/innovation--lab-3D8BD3)
+
+# AI Agent for Searching Agents
+
+## Description
+Find the Content Agent to generate AI-related content and send the content twitter agent.
         """
 
         agentverse_token = os.getenv("AGENTVERSE_API_KEY")
