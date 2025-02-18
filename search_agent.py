@@ -26,12 +26,14 @@ def init_client():
         logger.info(f"Search Agent started with address: {client_identity.address}")
 
         readme = """
-           ![domain:innovation-lab](https://img.shields.io/badge/innovation--lab-3D8BD3)
-
-# AI Agent for Searching Agents
+![Innovation Lab](https://img.shields.io/badge/innovation--lab-3D8BD3)
 
 ## Description
-Find the Content Agent to generate AI-related content and send the content twitter agent.
+My AI's description for searching agents.
+
+## Use Cases
+- Search for content generation agents.
+- Search twitter agent for tweet 
         """
 
         agentverse_token = os.getenv("AGENTVERSE_API_KEY")
@@ -88,7 +90,7 @@ def send_to_twitter_agent(content):
 def generate_and_send_content():
     while True:
         try:
-            query = "Generate a tweet about the latest AI trends."
+            query = "Generate a tweet about the latest AI"
             content_agent_address = os.getenv("CONTENT_AGENT_ADDRESS")
             if not content_agent_address:
                 logger.warning("CONTENT_AGENT_ADDRESS not set. Attempting to continue without content generation.")
