@@ -26,13 +26,13 @@ def init_client():
         logger.info(f"Content Generation Agent started with address: {client_identity.address}")
 
         readme = """
-![domain:innovation-lab](https://img.shields.io/badge/innovation--lab-3D8BD3)
-
-# AI Agent for create content for twitter agent
+![Innovation Lab](https://img.shields.io/badge/innovation--lab-3D8BD3)
 
 ## Description
-Uses Google’s Gemini API to create engaging AI trend content.
+My AI's description for searching agents.
 
+## Use Cases
+- Content Generation Agent.
         """
         register_with_agentverse(
             identity=client_identity,
