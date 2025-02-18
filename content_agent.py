@@ -26,7 +26,7 @@ def init_client():
         logger.info(f"Content Generation Agent started with address: {client_identity.address}")
 
         readme = """
-            ![domain:innovation-lab](https://img.shields.io/badge/innovation--lab-3D8BD3)
+![domain:innovation-lab](https://img.shields.io/badge/innovation--lab-3D8BD3)
 
 # AI Agent for create content for twitter agent
 
