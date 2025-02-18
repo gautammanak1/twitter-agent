@@ -37,14 +37,12 @@ def init_client():
         logger.info(f"Twitter Agent started with address: {client_identity.address}")
 
         readme = """
-           ![domain:innovation-lab](https://img.shields.io/badge/innovation--lab-3D8BD3)
-
-# Receives the content from search agent and posts it on Twitter.
-
-
+![Innovation Lab](https://img.shields.io/badge/innovation--lab-3D8BD3)
 ## Description
-Uses Google’s Gemini API to create engaging AI trend content.
+My AI's description for posting to Twitter.
 
+## Use Cases
+- Automatically posts content to Twitter.
         """
 
         # Register the agent with Agentverse
